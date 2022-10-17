@@ -1,14 +1,13 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -26,25 +25,32 @@ class SchedulesList {
     private var groups = mutableStateOf<List<String>>(emptyList())
     private var teachers = mutableStateOf<List<String>>(emptyList())
     private var schedule = mutableStateOf(DaysList(emptyList(), "aaa"))
-    var selectList = mutableStateOf(true)
+    private var selectList = mutableStateOf(true)
 
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
     @Composable
-    fun chooseLists() {
+    @Preview
+    fun chooseListsButtons() {
         Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            OutlinedButton(onClick = { selectList.value = true }) {
+            OutlinedButton(
+                onClick = { selectList.value = true },
+                modifier = Modifier.fillMaxWidth(0.5f)
+            ) {
                 Text(
                     text = "Группы",
                     color = Color.Gray
                 )
             }
 
-            OutlinedButton(onClick = { selectList.value = false }) {
+            OutlinedButton(
+                onClick = { selectList.value = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
                     text = "Учителя",
                     color = Color.Gray
@@ -58,7 +64,7 @@ class SchedulesList {
     fun showLists() {
         Column(modifier = Modifier.background(Color.Gray)) {
             Box {
-                chooseLists()
+                chooseListsButtons()
             }
             Box(modifier = Modifier.fillMaxHeight()) {
                 if (selectList.value) {
@@ -81,12 +87,14 @@ class SchedulesList {
             verticalArrangement = Arrangement.Center
         ) {
             for (i in groups.value)
-                TextButton(onClick = {
-                    scope.launch {
-                        schedule.value = RetrofitInstance.api.getschedulelist(i).body()!!
-                    }
-                },
-                    modifier = Modifier.fillMaxSize()) {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            schedule.value = RetrofitInstance.api.getschedulelist(i).body()!!
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     Text(
                         text = i,
                         color = Color.Black,
@@ -106,12 +114,14 @@ class SchedulesList {
             verticalArrangement = Arrangement.Center
         ) {
             for (i in teachers.value)
-                TextButton(onClick = {
-                    scope.launch {
-                        schedule.value = RetrofitInstance.api.getschedulelist(i).body()!!
-                    }
-                },
-                    modifier = Modifier.fillMaxSize()) {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            schedule.value = RetrofitInstance.api.getschedulelist(i).body()!!
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     Text(
                         text = i,
                         color = Color.Black,
@@ -123,11 +133,17 @@ class SchedulesList {
 
     @Composable
     fun window() {
+        val scrollState = rememberScrollState(0)
         Row(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.fillMaxWidth(0.3f)) {
+            Box(modifier = Modifier.fillMaxWidth(0.34f)) {
                 showLists()
             }
-            Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(10.dp)) {
+            VerticalScrollbar(
+                modifier = Modifier.align(Alignment.CenterVertically)
+                    .fillMaxHeight(),
+                adapter = ScrollbarAdapter(scrollState)
+            )
+            Column(modifier = Modifier.verticalScroll(scrollState).padding(10.dp)) {
                 daysList(schedule.value)
             }
         }
